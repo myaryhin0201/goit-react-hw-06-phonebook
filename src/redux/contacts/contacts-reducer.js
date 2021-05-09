@@ -1,23 +1,52 @@
 import { combineReducers } from 'redux';
 import { createReducer } from '@reduxjs/toolkit';
 import actions from './contacts-actions';
-const initialContacts = [
-  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56699' },
-  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12699' },
-  { id: 'id-3', name: 'Eden Clements', number: '645-17-79151' },
-  { id: 'id-4', name: 'Annie Copeland', number: '227-91-2612' },
-];
 
-const items = createReducer(initialContacts, {
-  [actions.addContact]: (state, { payload }) => [payload, ...state],
-  [actions.deleteContact]: (state, { payload }) =>
+const {
+  fetchContactRequest,
+  fetchContactSuccess,
+  fetchContactError,
+  addContactRequest,
+  addContactSuccess,
+  addContactError,
+  deleteContactRequest,
+  deleteContactSuccess,
+  deleteContactError,
+  changeFilter,
+} = actions;
+
+const items = createReducer([], {
+  [fetchContactSuccess]: (_, { payload }) => payload,
+  [addContactSuccess]: (state, { payload }) => [...state, payload],
+  [deleteContactSuccess]: (state, { payload }) =>
     state.filter(({ id }) => id !== payload),
 });
 const filter = createReducer('', {
-  [actions.changeFilter]: (_, { payload }) => payload,
+  [changeFilter]: (_, { payload }) => payload,
 });
 
-export default combineReducers({
-  items,
-  filter,
+const loading = createReducer(false, {
+  [addContactRequest]: () => true,
+  [addContactSuccess]: () => false,
+  [addContactError]: () => false,
+  [deleteContactRequest]: () => true,
+  [deleteContactSuccess]: () => false,
+  [deleteContactError]: () => false,
+  [fetchContactRequest]: () => true,
+  [fetchContactSuccess]: () => false,
+  [fetchContactError]: () => false,
 });
+
+const error = createReducer(false, {
+  [addContactRequest]: () => false,
+  [addContactSuccess]: () => false,
+  [addContactError]: () => true,
+  [deleteContactRequest]: () => false,
+  [deleteContactSuccess]: () => false,
+  [deleteContactError]: () => true,
+  [fetchContactRequest]: () => false,
+  [fetchContactSuccess]: () => false,
+  [fetchContactError]: () => true,
+});
+
+export default combineReducers({ items, filter, loading, error });

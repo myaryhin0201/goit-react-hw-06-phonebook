@@ -1,6 +1,6 @@
 import { createUseStyles } from 'react-jss';
 import { connect } from 'react-redux';
-import contactsActions from '../../redux/contacts/contacts-actions';
+import { contactsOperations, contactsSelectors } from '../../redux/contacts/';
 import PropTypes from 'prop-types';
 import ContactItem from '../ContantItem';
 const useStyles = createUseStyles({
@@ -43,19 +43,12 @@ ContactsList.propTypes = {
   ).isRequired,
 };
 
-const getFilteredContacts = (allItems, filter) => {
-  const normalizedFilter = filter.toLowerCase();
-  return allItems.filter(({ name }) =>
-    name.toLowerCase().includes(normalizedFilter),
-  );
-};
-
-const mapStateToProps = ({ contacts: { items, filter } }) => ({
-  contacts: getFilteredContacts(items, filter),
+const mapStateToProps = state => ({
+  contacts: contactsSelectors.getFilteredContacts(state),
 });
+
 const mapDispatchToProps = dispatch => ({
-  onDeleteContact: contactId =>
-    dispatch(contactsActions.deleteContact(contactId)),
+  onDeleteContact: id => dispatch(contactsOperations.deleteContact(id)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactsList);

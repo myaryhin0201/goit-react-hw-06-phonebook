@@ -1,19 +1,31 @@
 import { useState } from 'react';
 import { connect } from 'react-redux';
-import { contactsOperations } from '../../redux/contacts/';
+import contactsActions from '../../redux/contacts/contacts-actions';
 import PropTypes from 'prop-types';
 import useStyles from './ContactFormStyles';
 const initialState = {
   name: '',
   number: '',
 };
-const ContactForm = ({ onSubmit }) => {
+const ContactForm = ({ contacts, onSubmit }) => {
   const classes = useStyles();
   const [inputValue, setInputValue] = useState(initialState);
-
   const { name, number } = inputValue;
   const handleSubmit = e => {
     e.preventDefault();
+    const hasEmptyField = Object.values(inputValue).some(item => !item);
+    if (hasEmptyField) {
+      return;
+    }
+    if (
+      contacts.find(
+        contact => contact.name.toLowerCase() === name.toLowerCase(),
+      )
+    ) {
+      alert(`${name} is already in contacts`);
+      e.currentTarget.reset();
+      return;
+    }
     onSubmit(name, number);
     setInputValue(initialState);
     e.currentTarget.reset();
@@ -56,13 +68,22 @@ const ContactForm = ({ onSubmit }) => {
 };
 
 ContactForm.propTypes = {
+  contacts: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 
+const mapStateToProps = state => ({
+  contacts: state.contacts.items,
+});
+
 const mapDispatchToProps = dispatch => ({
   onSubmit: (name, number) => {
-    dispatch(contactsOperations.addContact(name, number));
+    dispatch(contactsActions.addContact(name, number));
   },
 });
 
-export default connect(null, mapDispatchToProps)(ContactForm);
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);
